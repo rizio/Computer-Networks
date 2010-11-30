@@ -80,7 +80,9 @@ def main ():
 	# Start GENOA's bittornado dl/seed
 	
 	# Start MICKEY'S iperf client
-	#print 'Setup MICKEY with iperf client.'
+	print '\nSetup MICKEY with iperf client.'
+	mickey = ssh_command(user, MICKEY, password)
+	start_iperf (mickey, MICKEY, BARCA, False)
 	
 	# Start ROMA's iperf client
 	print '\nSetup Roma with iperf client.'	
@@ -96,8 +98,8 @@ def main ():
 	# spoof.close()
 	# inter.close()
 	# genoa.close()
-	# mickey.close()
-	# roma.close()
+	mickey.close()
+	roma.close()
 	
 if __name__ == '__main__':
 	print "Running BitTorrent setup."
