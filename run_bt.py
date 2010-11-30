@@ -35,6 +35,7 @@ def ssh_command (user, host, password):
 
 def start_iperf (child, srcMachine, dstMachine=None, server=True):
 	"""
+	This method starts iperf on the child.
 	"""
 	if(server == True):
 		print 'Starting iperf server on: %s.' % srcMachine
@@ -42,6 +43,24 @@ def start_iperf (child, srcMachine, dstMachine=None, server=True):
 	else:
 		print 'Starting iperf client on: %s, to %s.' % (srcMachine, dstMachine)
 		child.sendline('/bin/bash -c "iperf -c %s -i 5 > iperf_log.txt"' % dstMachine) #-t 120
+
+def start_opentracker (child, host):
+	"""
+	"""
+	print 'Starting OpenTracker on %s.' % host
+	child.sendline('/bin/bash -c "./opentracker -i %s -P 6969 -p 6969"' % host)
+
+def become_su(child, password):
+	"""
+	"""
+	print 'Becoming superuser.'
+	child.sendline('sudo su -')
+	i = child.expect([pexpect.TIMEOUT, '.* password for .*'])
+	if i == 0:
+		print 'Error becoming superuser.'
+		print child.before, child.after
+		return None
+	child.sendline(password)
 
 def main ():
 	GWAGDY = '192.168.1.110'
@@ -58,18 +77,22 @@ def main ():
 	password = getpass.getpass('Password: ')
 
 	# Start GWAGDY's iperf server
-	print 'Setup Gwagdy with iperf server.'
-	gwagdy = ssh_command (user, GWAGDY, password)
-	start_iperf (gwagdy, GWAGDY)
+	# print 'Setup Gwagdy with iperf server.'
+	# gwagdy = ssh_command (user, GWAGDY, password)
+	# start_iperf (gwagdy, GWAGDY)
 	
 	# Start BARCA's iperf server
-	print '\nSetup Barca with iperf server.'
-	barca = ssh_command (user, BARCA, password)
-	start_iperf (barca, BARCA)
+	# print '\nSetup Barca with iperf server.'
+	# barca = ssh_command (user, BARCA, password)
+	# start_iperf (barca, BARCA)
 
 	# Start GHELMY's OpenTracker
-	#print '\nSetup GHELMY with OpenTracker.'
-	
+	print '\nSetup GHELMY with OpenTracker.'
+	ghelmy = ssh_command(user, GHELMY,  password)
+	become_su(ghelmy,  password)
+	ghelmy.sendline('cd /opentracker')
+	print ghelmy.after
+	start_opentracker(ghelmy, GHELMY)
 	
 	# Start GHELMY's bittornado dl/seed
 	
@@ -80,26 +103,26 @@ def main ():
 	# Start GENOA's bittornado dl/seed
 	
 	# Start MICKEY'S iperf client
-	print '\nSetup MICKEY with iperf client.'
-	mickey = ssh_command(user, MICKEY, password)
-	start_iperf (mickey, MICKEY, BARCA, False)
+	# print '\nSetup MICKEY with iperf client.'
+	# mickey = ssh_command(user, MICKEY, password)
+	# start_iperf (mickey, MICKEY, BARCA, False)
 	
 	# Start ROMA's iperf client
-	print '\nSetup Roma with iperf client.'	
-	roma = ssh_command(user, ROMA, password)
-	start_iperf (roma, ROMA, GWAGDY, False)
+	# print '\nSetup Roma with iperf client.'	
+	# roma = ssh_command(user, ROMA, password)
+	# start_iperf (roma, ROMA, GWAGDY, False)
 
 	raw_input("\n\nExperiment running.  Hit <Enter> to quit.\n")
 	
 	# TEAR DOWN
-	gwagdy.close()
-	barca.close()
-	# ghelmy.close()
+	# gwagdy.close()
+	# barca.close()
+	ghelmy.close()
 	# spoof.close()
 	# inter.close()
 	# genoa.close()
-	mickey.close()
-	roma.close()
+	# mickey.close()
+	# roma.close()
 	
 if __name__ == '__main__':
 	print "Running BitTorrent setup."
