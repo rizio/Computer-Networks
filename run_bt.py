@@ -55,12 +55,17 @@ def become_su(child, password):
 	"""
 	print 'Becoming superuser.'
 	child.sendline('sudo su -')
-	i = child.expect([pexpect.TIMEOUT, '.* password for .*'])
+	i = child.expect([pexpect.TIMEOUT, '(.*?) password for (.*?):', 'root@(.*)'], timeout=5)
 	if i == 0:
 		print 'Error becoming superuser.'
 		print child.before, child.after
 		return None
-	child.sendline(password)
+	if i == 1:
+		child.sendline(password)
+		print 'Password entered.'
+	if i == 2:
+		print 'Password already entered.'
+		return None
 
 def main ():
 	GWAGDY = '192.168.1.110'
@@ -77,24 +82,24 @@ def main ():
 	password = getpass.getpass('Password: ')
 
 	# Start GWAGDY's iperf server
-	# print 'Setup Gwagdy with iperf server.'
+	# print '[GWAGDY]: start iperf server'
 	# gwagdy = ssh_command (user, GWAGDY, password)
 	# start_iperf (gwagdy, GWAGDY)
 	
 	# Start BARCA's iperf server
-	# print '\nSetup Barca with iperf server.'
+	# print '\n[BARCA]: Start iperf server'
 	# barca = ssh_command (user, BARCA, password)
 	# start_iperf (barca, BARCA)
 
 	# Start GHELMY's OpenTracker
-	print '\nSetup GHELMY with OpenTracker.'
+	print '\n[GHELMY]: start OpenTracker.'
 	ghelmy = ssh_command(user, GHELMY,  password)
 	become_su(ghelmy,  password)
-	ghelmy.sendline('cd /opentracker')
-	print ghelmy.after
+	ghelmy.sendline('cd opentracker')
 	start_opentracker(ghelmy, GHELMY)
 	
 	# Start GHELMY's bittornado dl/seed
+	#print '\n[GHELMY]: start seeding torrent file.'
 	
 	# Start SPOOF's bittornado dl/seed
 	
