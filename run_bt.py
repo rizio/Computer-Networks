@@ -11,6 +11,8 @@ import getpass, os
 
 def ssh_command (user, host, password):
 	"""
+	SSH into 'host' with password 'password'.
+	This method will handle logging in to a machine where keys have not been exchanged.
 	"""
 	ssh_newkey = 'Are you sure you want to continue connecting'
 	child = pexpect.spawn('ssh -l %s %s'%(user, host))
@@ -46,12 +48,19 @@ def start_iperf (child, srcMachine, dstMachine=None, server=True):
 
 def start_opentracker (child, host):
 	"""
+	Start the OpenTracker BitTorrent tracker on 'host'.
+	You must be a super user to call this method.
 	"""
 	print 'Starting OpenTracker on %s.' % host
 	child.sendline('/bin/bash -c "./opentracker -i %s -P 6969 -p 6969"' % host)
 
+def start_bittorrent (child):
+	"""
+	"""
+
 def become_su(child, password):
 	"""
+	Call this method to elevate the current user to superuser.
 	"""
 	print 'Becoming superuser.'
 	child.sendline('sudo su -')
@@ -102,6 +111,8 @@ def main ():
 	#print '\n[GHELMY]: start seeding torrent file.'
 	
 	# Start SPOOF's bittornado dl/seed
+	print '\n[SPOOF]: start seeing torrent file.'
+	
 	
 	# Start INTER's bittornado dl/seed
 	
