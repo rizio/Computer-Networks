@@ -193,9 +193,9 @@ def main ():
 	roma = ssh_command(user, ROMA, password)
 	start_iperf (roma, ROMA, GWAGDY, False)
 
-	print('-------------------------------------------')
+	print '-------------------------------------------'
 	raw_input("\n\nExperiment running.  Hit <Enter> to quit.\n")
-	print('-------------------------------------------')
+	print '-------------------------------------------'
 	
 	# --
 	# TEAR DOWN
@@ -210,7 +210,7 @@ def main ():
 	genoa.close()
 	mickey.close()
 	roma.close()
-	
+
 if __name__ == '__main__':
 	print "Running BitTorrent setup."
 	
