@@ -52,7 +52,7 @@ def ssh_command (user, host, password):
 	print 'Login to %s successful.' % host
 	return child
 
-def start_iperf (child, srcMachine, dstMachine=None, server=True):
+def start_iperf (child, hostName, srcMachine, dstMachine=None, server=True):
 	"""
 	This method starts iperf on the child.
 	"""
@@ -61,7 +61,7 @@ def start_iperf (child, srcMachine, dstMachine=None, server=True):
 		child.sendline('/bin/bash -c "iperf -s > iperf_log.txt"')
 	else:
 		print 'Starting iperf client on: %s, to %s.' % (srcMachine, dstMachine)
-		child.sendline('/bin/bash -c "iperf -c %s -i 5 -t 320 > iperf_log.txt"' % dstMachine)
+		child.sendline('/bin/bash -c "iperf -c %s -i 5 -t 320 > iperf_log_%s.txt"' % (dstMachine, hostName))
 
 def start_opentracker (child, host):
 	"""
@@ -114,12 +114,12 @@ def main ():
 	# --
 	print '[GWAGDY]: start iperf server'
 	gwagdy = ssh_command (user, GWAGDY, password)
-	start_iperf (gwagdy, GWAGDY)
+	start_iperf (gwagdy, 'gwagdy', GWAGDY)
 	
 	# Start BARCA's iperf server
 	print '\n[BARCA]: Start iperf server'
 	barca = ssh_command (user, BARCA, password)
-	start_iperf (barca, BARCA)
+	start_iperf (barca, 'gwagdy', BARCA)
 
 	# --
 	# Start GHELMY's OpenTracker
@@ -133,16 +133,18 @@ def main ():
 	# Wait a sec before starting seeding
 	time.sleep(2)
 	
+	raw_input("\n\nOpenTracker is started.  Run rTorrent and seed.  Hit <Enter> to continue.\n")
+	
 	# -- 
 	# Start GHELMY's bittornado seeding
 	# --
-	print '\n[GHELMY]: start seeding torrent file.'
-	ghelmy_torrent = ssh_command(user, GHELMY,  password)
-
-	if ghelmy_torrent:
-		start_bittorrent(ghelmy_torrent, GHELMY)
-	else:
-		print 'Could not connect to Ghelmy.'
+	# print '\n[GHELMY]: start seeding torrent file.'
+	# ghelmy_torrent = ssh_command(user, GHELMY,  password)
+	# 
+	# if ghelmy_torrent:
+	# 	start_bittorrent(ghelmy_torrent, GHELMY)
+	# else:
+	# 	print 'Could not connect to Ghelmy.'
 	
 	time.sleep(1)
 	
@@ -184,14 +186,14 @@ def main ():
 	# --
 	print '\n[MICKEY]: start iperf client.'
 	mickey = ssh_command(user, MICKEY, password)
-	start_iperf (mickey, MICKEY, BARCA, False)
+	start_iperf (mickey, 'mickey', MICKEY, BARCA, False)
 	
 	# --	
 	# Start ROMA's iperf client
 	# --
 	print '\n[ROMA]: start iperf client.'	
 	roma = ssh_command(user, ROMA, password)
-	start_iperf (roma, ROMA, GWAGDY, False)
+	start_iperf (roma, 'roma', ROMA, GWAGDY, False)
 
 	print '-------------------------------------------'
 	raw_input("\n\nExperiment running.  Hit <Enter> to quit.\n")
